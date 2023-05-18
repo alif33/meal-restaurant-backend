@@ -39,6 +39,12 @@ app.use("/api", restaurantRoutes);
 app.use("/api", menuRoutes);
 app.use("/api", rolesRoutes);
 
+app.get("/", (req, res)=>{
+  res.send({
+    name: "Ismail Hosen Alif"
+  })
+})
+
 app.get("/upload", upload.single("image"),  async(req, res)=>{
   try {
     const result = await cloudinary.uploader.upload(req.file.path);
