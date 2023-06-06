@@ -41,48 +41,16 @@ exports.addSchedule = async(req, res) => {
 };
 
 
-exports.updateSchedule = async(req, res) => {
-    const { _id } = req.query;
-    const {
-      name,
-      drivingRadius,
-      minimumOrder,
-      maximumOrder,
-      deliveryFee,
-      address,
-      addMarker
-    } = req.body;
+exports.dropSchedule = async(req, res) => {
   
-    const updates = {
-      name,
-      drivingRadius,
-      minimumOrder,
-      maximumOrder,
-      deliveryFee,
-      address,
-      addMarker
-    };
-  
-    Schedule.findOneAndUpdate(
-      { _id },
-      { $set: updates },
-      { returnOriginal: false },
-      (err, dz) => {
-        if (err) {
-          return res.status(400).json({
-            err,
-            message: "Something went wrong",
-          });
-        }
-  
-        if (dz) {
-          return res.status(201).json({
-            success: true,
-            message: "Delivery zone updated sucessfully"
-          });
-        }
-      }
-    );
+  const schedule = await Schedule.findByIdAndDelete({_id: req.query._id})
+
+  if(schedule) {
+    return res.status(201).json({
+      success: true,
+      message: 'Schedule deleted successfully'
+    });
+  }
 };
 
 

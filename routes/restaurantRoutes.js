@@ -9,7 +9,7 @@ const {
 const { 
    getSchedules,
    addSchedule,
-   updateSchedule
+   dropSchedule
    // deleteCoupon
  } = require("../controller/scheduleController");
 
@@ -52,7 +52,7 @@ router.delete('/restaurant/coupon', deleteCoupon);
 
 router.get('/restaurant/schedules', getSchedules);
 router.post('/restaurant/schedule', addSchedule);
-router.put('/restaurant/schedule', updateSchedule);
+router.delete('/restaurant/schedule', dropSchedule);
 // router.delete('/restaurant/coupon', deleteCoupon); 
 
 router.get('/restaurant/delivery-zones', getDeliveryZones);
