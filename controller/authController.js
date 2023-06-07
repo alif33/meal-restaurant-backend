@@ -20,17 +20,18 @@ exports.signin = (req, res) => {
     if (error) return res.status(400).json({ error });
     
     if (user && bcrypt.compareSync(password, user.password)) {
-      const { _id, email } = user;
-      const token = generateJwtToken(_id, email);
-      res.status(200).json({
-        success: true,
-            message: "Well come",
-            token,
-            email
-          });
+        const { _id, email } = user;
+        const token = generateJwtToken(_id, email);
+
+        res.status(200).json({
+          success: true,
+          message: "Well come",
+          token,
+          email
+        });
           
         } else {
-          return res.status(400).json({ message: "Something went wrong" });
+          return res.status(400).json({ invalid: true,  message: "Invalid Credentials" });
         }
       });
     };
