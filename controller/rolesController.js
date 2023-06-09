@@ -2,7 +2,7 @@ const Role = require("../models/Role");
 
 exports.getRoles = async(req, res)=>{
     const roles = await Role.find({});
-    res.status(200).json(roles);
+    res.status(200).json({roles});
 }
 
 exports.addRoles = async(req, res) => {

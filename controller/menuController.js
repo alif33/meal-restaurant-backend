@@ -41,8 +41,6 @@ exports.addCategory = async(req, res) => {
       }
 };
 
-
-
 exports.updateCategory = async(req, res)=>{
     const { 
         name,
@@ -116,41 +114,50 @@ exports.addProduct = async(req, res) => {
     const {  
         name, 
         description,
+        image,
+        options,
+        types,
+        addons,
         category,
-        resturant 
-      } = req.body;
+        resturant
+    } = req.body;
     
     const _product = new Product({
         name, 
         description,
+        image,
+        options,
+        types,
+        addons,
         category,
         resturant
     });
 
     const product = await _product.save();
-    if (product) {
+
+    if(product){
         Category.findOneAndUpdate(
-        { _id: category },
-        { $push: {
-            "products": product._id
-        }},
-        { returnOriginal: false },
-        (err, category) => {
-            if (err) {
-            return res.status(400).json({
-                err,
-                message: "Something went wrong",
-            });
+            { _id: category },
+            { $push: {
+                "products": product._id
+            }},
+            { returnOriginal: false },
+            (err, category) => {
+                if (err) {
+                    return res.status(400).json({
+                        err,
+                        message: "Something went wrong",
+                    });
+                }
+
+                if (category) {
+                    return res.status(201).json({
+                        success: true,
+                        category,
+                        message: "Product added successfully"
+                    });
+                }
             }
-    
-            if (category) {
-            return res.status(201).json({
-                success: true,
-                category,
-                message: "Product added successfully"
-            });
-            }
-        }
         );
     }
 };
@@ -158,32 +165,30 @@ exports.addProduct = async(req, res) => {
 
 exports.updateProduct = async(req, res)=>{
     const { 
-        name,
+        name, 
         description,
-        _date,
-        date_,
-        deliveryMethod,
-        dayWeek,
-        startTime,
-        endTime
+        image,
+        options,
+        types,
+        addons,
+        category
     } = req.body;
 
   const updates = {
-        name,
+        name, 
         description,
-        _date,
-        date_,
-        deliveryMethod,
-        dayWeek,
-        startTime,
-        endTime,
+        image,
+        options,
+        types,
+        addons,
+        category
     };
 
-  Category.findOneAndUpdate(
-    { _id: req.query.rid },
+  Product.findOneAndUpdate(
+    { _id: req.query.pid },
     { $set: updates },
     { returnOriginal: false },
-    (err, category) => {
+    (err, product) => {
       if (err) {
         return res.status(400).json({
           err,
@@ -191,10 +196,10 @@ exports.updateProduct = async(req, res)=>{
         });
       }
 
-      if (category) {
+      if (product) {
         return res.status(201).json({
           success: true,
-          message: "Category updated successfully"
+          message: "Product updated successfully"
         });
       }
     }
@@ -204,6 +209,7 @@ exports.updateProduct = async(req, res)=>{
 exports.deleteProduct = async(req, res) => {
 
     const { cid, pid } = req.query
+
     Category.findOneAndUpdate(
     { _id: cid },
     { $pull: {

@@ -19,15 +19,10 @@ const userSchema = new mongoose.Schema(
           required: true, 
           unique: true 
         },
-        type: {
-          type: String,
-          enum : ['Employee', 'Employee1'],
-          default: 'Employee'
-        },
         team: {
-          type: String,
-          enum : ['Customer', 'Support'],
-          default: 'Support'
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Role",
+          required: true
         },
         phone: {
           type: String, 

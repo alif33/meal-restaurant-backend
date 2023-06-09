@@ -1,10 +1,13 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const Role = require("../models/Role");
 const { generateJwtToken } = require("../utils");
+const { sendMail } = require("../utils/Mailer");
 
 exports.getUsers = async(req, res) => {
   try{
-    const users = await User.find({});
+    const _users = await User.find({}).populate("team", { Role });
+    const users = _users.reverse();
     return res.status(200).json(users)
   }catch(err){
     return res.status(500).json({
@@ -16,6 +19,7 @@ exports.getUsers = async(req, res) => {
 
 exports.signin = (req, res) => {
   const { email, password } = req.body
+
   User.findOne({ email }).exec(async (error, user) => {
     if (error) return res.status(400).json({ error });
     
@@ -34,7 +38,7 @@ exports.signin = (req, res) => {
           return res.status(400).json({ invalid: true,  message: "Invalid Credentials" });
         }
       });
-    };
+};
 
 exports.register = async(req, res) => { 
       const { 
@@ -43,7 +47,6 @@ exports.register = async(req, res) => {
         email,
         password,
         image,
-        type,
         team,
         phone,
         status
@@ -64,7 +67,6 @@ exports.register = async(req, res) => {
             userName,
             email,
             password: hashedPassword,
-            type,
             team,
             phone,
             image
@@ -94,3 +96,61 @@ exports.register = async(req, res) => {
     });
   }
 }
+
+exports.forgetPasswrd = async(req, res) => {
+
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if(user){
+      const token = generateJwtToken(user);
+      const href = `${ process.env.APP_URI }/update-password/${ token }`
+        await sendMail({
+            from: process.env.SENDER_MAIL,
+            to: email,
+            subject: `Recovery your password`,
+            text: 'test text',
+            html: `<h1>Reset your password. <a href=${ href }>link</a></h1>`
+        });
+
+        return res.send({
+            success: true,
+            message: "Please check your Email",
+        });
+  }
+
+  res.send({
+    success: false,
+    notfound: true,
+    message: "Please register first."
+  })
+};
+
+exports.updatePassword = async(req, res) => {
+  const { _id } = req.user;
+  const { password } = req.body;
+
+  const salt = await bcrypt.genSalt(10);
+  const _password = await bcrypt.hash(password, salt);
+
+  User.findOneAndUpdate(
+    { _id }, 
+    { $set: { password: _password } },
+    { returnOriginal: false },
+    (err, user)=>{
+        if(err){
+            return res.status(400).json({
+                err,
+                message: "Something went wrong",
+            });
+        }
+
+        if(user){
+          return res.send({
+            success: true,
+            message: "Password updated successfully",
+          });
+        }
+    }
+  )
+};
