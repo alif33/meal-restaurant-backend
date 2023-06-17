@@ -12,7 +12,7 @@ exports.addRestaurant = async(req, res) => {
         webHeaderImage,
         mobileHeaderImage
       } = req.body;
-  
+    
         const _restaurant = new Resturant({
          name,
          shopLogo,
@@ -155,19 +155,3 @@ exports.updateRestaurant = async(req, res) => {
       }
     );
 };
-
-
-
-// exports.removeAuthor = async(req, res) => {
-//     const { _id }= req.query;
-//     if(_id){
-//         Author
-//         .find({ _id })
-//         .deleteOne(()=>{
-//             res.send({
-//                 success: true,
-//                 message: 'Author deleted successfully'
-//             });
-//         });
-//     }
-// };

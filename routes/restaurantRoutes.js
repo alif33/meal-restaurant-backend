@@ -32,7 +32,6 @@ const {
    updateRestaurant 
 } = require('../controller/restaurantController');
 
-
 const { 
    getCuisineTypes,
    addCuisineType,
