@@ -24,14 +24,21 @@ exports.signin = (req, res) => {
     if (error) return res.status(400).json({ error });
     
     if (user && bcrypt.compareSync(password, user.password)) {
-        const { _id, email } = user;
+        const { _id, name, userName, email, phone, image } = user;
         const token = generateJwtToken(_id, email);
 
         res.status(200).json({
           success: true,
           message: "Well come",
           token,
-          email
+          user: {
+            _id,
+            name,
+            userName,
+            email,
+            phone,
+            image
+          }
         });
           
         } else {
@@ -69,7 +76,8 @@ exports.register = async(req, res) => {
             password: hashedPassword,
             team,
             phone,
-            image
+            image,
+            status: status? "ACTIVE": "DISABLE"
         });
 
       _user.save( async(err, user) => {
@@ -96,6 +104,119 @@ exports.register = async(req, res) => {
     });
   }
 }
+
+
+exports.updateUser = async(req, res) => {
+  const { _id } = req.query;
+  const {
+    name,
+    userName,
+    email,
+    password,
+    image,
+    team,
+    phone,
+    status
+  } = req.body;
+
+  const updates = {
+    userName,
+    email,
+    name,
+    phone,
+    status
+  };
+
+  if(image){
+    updates.image = image
+  }
+
+  if(password){
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    updates.password = hashedPassword
+  }
+
+  User.findOneAndUpdate(
+      { _id }, 
+      { $set: updates },
+      { returnOriginal: false },
+      (err, user)=>{
+          if(err){
+            return res.status(400).json({
+                err,
+                message: "Something went wrong",
+            });
+          }
+
+          if(user){
+              console.log(user);
+
+              return res.status(201).json({
+                  success: true,
+                  message: "Updated"
+              });
+
+             
+          }
+      }
+  )
+}
+
+exports.makePermissions = async(req, res) => {
+  const { _id } = req.query;
+  const { 
+    status
+  } = req.body;
+
+  const updates = {};
+
+  User.findOneAndUpdate(
+      { _id }, 
+      { $set: updates },
+      { returnOriginal: false },
+      (err, user)=>{
+          if(err){
+              return res.status(400).json({
+                  err,
+                  message: "Something went wrong",
+              });
+          }
+
+          if(user){
+              return res.status(201).json({
+                  success: true,
+                  message: `${status? "Enabled": "Disabled"}`
+              });
+          }
+      }
+  )
+}
+
+exports.deleteUsers = async(req, res) => {
+  const { _id } = req.query;
+  User.deleteOne({ _id }, (err, response) => {
+    if (err) {
+      return res.status(400).json({
+        err,
+        message: "Something went wrong",
+      });
+    }
+    if (response.deletedCount === 1) {
+      return res.send({
+        success: true,
+        message: "Deleted successfully",
+      });
+    }
+  });
+}
+
+
+
+
+
+
+
 
 exports.forgetPasswrd = async(req, res) => {
 
